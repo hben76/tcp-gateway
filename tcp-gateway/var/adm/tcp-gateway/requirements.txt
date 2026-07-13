@@ -1,0 +1,10 @@
+# TCP Gateway Python dependencies
+#
+# Runtime dependencies for REST API service
+#
+
+fastapi==0.139.0
+uvicorn[standard]==0.35.0
+pydantic==2.11.7
+httpx==0.28.1
+pyyaml==6.0.2

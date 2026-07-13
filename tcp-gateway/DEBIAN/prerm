@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+SERVICE=tcp-gateway.service
+
+systemctl stop ${SERVICE} || true
+systemctl disable ${SERVICE} || true
+
+exit 0

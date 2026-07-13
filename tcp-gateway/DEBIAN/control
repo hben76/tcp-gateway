@@ -1,0 +1,11 @@
+Package: tcp-gateway
+Version: 0.4.1
+Section: net
+Priority: optional
+Architecture: amd64
+Maintainer: Hans Bengtsson
+Depends: systemd, python3, python3-venv, python3-pip, iputils-ping
+Description: TCP Gateway Connectivity Validation Service
+ Secure REST API based connectivity validation gateway.
+ Supports TCP, HTTP/HTTPS and ICMP connectivity checks.
+ Provides automation integration through authenticated API access.

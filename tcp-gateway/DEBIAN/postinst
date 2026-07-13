@@ -1,0 +1,79 @@
+#!/bin/bash
+set -e
+
+APPDIR=/var/adm/tcp-gateway
+SERVICE=tcp-gateway.service
+USER=tcp-gw
+GROUP=tcp-gw
+
+# Create service group if missing
+if ! getent group ${GROUP} >/dev/null 2>&1; then
+    groupadd --system ${GROUP}
+fi
+
+# Create service user if missing
+if ! id ${USER} >/dev/null 2>&1; then
+    useradd \
+        --system \
+        --gid ${GROUP} \
+        --home ${APPDIR} \
+        --shell /usr/sbin/nologin \
+        ${USER}
+fi
+
+# Ownership
+chown -R ${USER}:${GROUP} ${APPDIR} || true
+
+# Create Python virtual environment if missing
+if [ ! -d "${APPDIR}/.venv" ]; then
+    python3 -m venv ${APPDIR}/.venv
+fi
+
+# Install Python dependencies
+${APPDIR}/.venv/bin/pip install \
+    --upgrade pip
+
+${APPDIR}/.venv/bin/pip install \
+    -r ${APPDIR}/requirements.txt
+
+# Ensure venv ownership
+chown -R ${USER}:${GROUP} ${APPDIR}/.venv
+
+# systemd service ownership
+chown root:root /lib/systemd/system/${SERVICE} || true
+
+# Directory permissions
+chmod 750 ${APPDIR}
+
+chmod 750 ${APPDIR}/app
+chmod 750 ${APPDIR}/config
+chmod 750 ${APPDIR}/docs
+
+# Python files
+find ${APPDIR}/app -type f -name "*.py" -exec chmod 640 {} \;
+find ${APPDIR}/tests -type f -name "*.py" -exec chmod 640 {} \;
+
+CONFIG="${APPDIR}/config/config.yaml"
+
+if [ ! -f "${CONFIG}" ]; then
+    cp "${APPDIR}/config/config.yaml.example" "${CONFIG}"
+    chmod 640 "${CONFIG}"
+fi
+
+# Protect configuration
+if [ -d "${APPDIR}/config" ]; then
+    chown -R "${USER}:${GROUP}" "${APPDIR}/config"
+    find "${APPDIR}/config" -type d -exec chmod 750 {} \;
+    find "${APPDIR}/config" -type f -exec chmod 640 {} \;
+fi
+
+# Executable entry permissions
+chmod 750 ${APPDIR}
+
+systemctl daemon-reload
+systemctl enable ${SERVICE}
+
+# Restart if already installed, otherwise start
+systemctl restart ${SERVICE}
+
+exit 0

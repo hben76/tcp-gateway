@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+SERVICE=tcp-gateway.service
+
+rm -f /etc/systemd/system/${SERVICE}
+
+systemctl daemon-reload
+
+exit 0

@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# TCP Gateway
+# Copyright (C) 2026 Hans Bengtsson
+#
+# systemd service
+#
+
+[Unit]
+Description=TCP Gateway Connectivity Service
+Documentation=https://localhost/api/docs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+AmbientCapabilities=CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_RAW
+
+User=tcp-gw
+Group=tcp-gw
+
+WorkingDirectory=/var/adm/tcp-gateway
+
+Environment="PYTHONUNBUFFERED=1"
+Environment="TCP_GATEWAY_CONFIG=/var/adm/tcp-gateway/config/config.yaml"
+
+ExecStart=/var/adm/tcp-gateway/.venv/bin/uvicorn \
+    app.main:app \
+    --host 0.0.0.0 \
+    --port 59876
+
+Restart=always
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+# Allow application directory access
+ReadWritePaths=/var/adm/tcp-gateway
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

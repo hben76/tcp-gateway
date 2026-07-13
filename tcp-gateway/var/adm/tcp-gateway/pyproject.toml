@@ -1,0 +1,17 @@
+[project]
+name = "tcp-gateway"
+version = "0.1.0"
+description = "High Availability TCP Connectivity Gateway"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "AGPL-3.0-only"
+
+authors = [
+    { name = "Hans Bengtsson" }
+]
+
+dependencies = [
+    "fastapi>=0.116.0",
+    "uvicorn[standard]>=0.35.0",
+    "pydantic>=2.11.0"
+]
